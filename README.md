@@ -6,6 +6,7 @@
 ## Project setup
 ```
 npm install
+hahaha
 ```
 
 ### Compiles and hot-reloads for development
