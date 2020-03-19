@@ -1,0 +1,15 @@
+kind: pipeline
+name: default
+
+steps:
+  - name: frontend
+    image: node
+    commands:
+      - ls -al
+      - echo haha
+
+trigger:
+  branch:
+    - master
+  event:
+    - push
