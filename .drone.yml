@@ -1,13 +1,16 @@
+---
 kind: pipeline
 name: default
 
 steps:
-  - name: frontend
-    image: node
+  - name: echo
     commands:
       - ls -al
       - echo haha
       - echo test
+  when:
+    event:
+      - push
 
 trigger:
   branch:
