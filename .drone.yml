@@ -4,49 +4,54 @@ type: docker
 name: default
 
 steps:
-  - name: echo
-    image: node:8.11.3-alpine
-    commands:
-    - ls -al
-    - ls -al
+- name: echo
+  image: node:8.11.3-alpine
+  commands:
+  - ls -al
+  - ls -al
 
-  - name: ssh deploy
-    image: appleboy/drone-ssh
-    settings:
-      host:
-        from_secret: SSH_HOST
-      username:
-        from_secret: SSH_USERNAME
-      key:
-        from_secret: SSH_KEY
-      passphrase:
-        from_secret: SSH_PASSPHRASE
-      port: 22
-      command_timeout: 2m
-      script_stop: true
-      script:
-        - echo start
-        - cd ~/ci_test/github_action_test
-        - ls -al
-        - rsync -a $DRONE_DIR:~/ci_test/github_action_test
+- name: ssh deploy
+  image: appleboy/drone-ssh
+  settings:
+    host:
+      from_secret: SSH_HOST
+    username:
+      from_secret: SSH_USERNAME
+    key:
+      from_secret: SSH_KEY
+    passphrase:
+      from_secret: SSH_PASSPHRASE
+    port: 22
+    command_timeout: 2m
+    # script_stop: true
+    script:
+      - echo ----start----
+      - cd ~/ci_test/github_action_test
+      - ls -al
+      - eval "$(ssh-agent -s)"
+      - ssh-add ~/.ssh/drone
+      - echo ----fetch start----
+      - git fetch origin
+      - echo ----fetch end----
+      - git merge origin/master
 
-  - name: slack
-    image: plugins/slack
-    settings:
-      webhook:
-        from_secret: SLACK_WEBHOOK
-      channel: bot-test
-      username: drone-ci
-      icon_url: 'https://unsplash.it/256/256/?random'
-    template: >
-      {{#if build.pull }}
-        *{{#success build.status}}✔{{ else }}✘{{/success}} {{ uppercasefirst build.status }}*: <https://github.com/{{ repo.owner }}/{{ repo.name }}/pull/{{ build.pull }}|Pull Request #{{ build.pull }}>
-      {{else}}
-        *{{#success build.status}}✔{{ else }}✘{{/success}} {{ uppercasefirst build.status }}: Build #{{ build.number }}* (type: `{{ build.event }}`)
-      {{/if}}
-      Commit: <https://github.com/{{ repo.owner }}/{{ repo.name }}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}>
-      Branch: <https://github.com/{{ repo.owner }}/{{ repo.name }}/commits/{{ build.branch }}|{{ build.branch }}>
-      <{{ build.link }}|Visit build page ↗>
+- name: slack
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: SLACK_WEBHOOK
+    channel: bot-test
+    username: drone-ci
+    icon_url: 'https://unsplash.it/256/256/?random'
+  template: >
+    {{#if build.pull }}
+      *{{#success build.status}}✔{{ else }}✘{{/success}} {{ uppercasefirst build.status }}*: <https://github.com/{{ repo.owner }}/{{ repo.name }}/pull/{{ build.pull }}|Pull Request #{{ build.pull }}>
+    {{else}}
+      *{{#success build.status}}✔{{ else }}✘{{/success}} {{ uppercasefirst build.status }}: Build #{{ build.number }}* (type: `{{ build.event }}`)
+    {{/if}}
+    Commit: <https://github.com/{{ repo.owner }}/{{ repo.name }}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}>
+    Branch: <https://github.com/{{ repo.owner }}/{{ repo.name }}/commits/{{ build.branch }}|{{ build.branch }}>
+    <{{ build.link }}|Visit build page ↗>
 
 trigger:
   branch:
