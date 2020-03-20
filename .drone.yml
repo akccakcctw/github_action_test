@@ -8,6 +8,7 @@ steps:
     image: node:8.11.3-alpine
     commands:
     - ls -al
+    - ls -al
 
   - name: ssh deploy
     image: appleboy/drone-ssh
