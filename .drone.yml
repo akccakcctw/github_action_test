@@ -27,8 +27,8 @@ steps:
       script:
         - echo start
         - cd ~/ci_test/github_action_test
-        - eval "$(ssh-agent -s)"
-        - ssh-agent $(ssh-add ~/.ssh/drone; git pull origin master)
+        - ls -al
+        - git pull origin master
 
   - name: slack
     image: plugins/slack
