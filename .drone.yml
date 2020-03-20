@@ -28,7 +28,7 @@ steps:
         - echo start
         - cd ~/ci_test/github_action_test
         - ls -al
-        - git pull origin master
+        - rsync -a $DRONE_DIR:~/ci_test/github_action_test
 
   - name: slack
     image: plugins/slack
